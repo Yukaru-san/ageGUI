@@ -19,11 +19,12 @@ func PrepareRecipient(publicKey string) (pubKey string, privateKey string, err e
 	// If key is a file reference
 	if DoesFileExist(publicKey) {
 		publicKey = ReadFileToString(publicKey)
+		pubKey = ""
 	}
 
 	// If no key was supplied
 	if publicKey == "" {
-		publicKey, privateKey, err = GenerateX25519Identity()
+		pubKey, privateKey, err = GenerateX25519Identity()
 	}
 
 	Recipient, err = age.ParseX25519Recipient(publicKey)
@@ -31,7 +32,7 @@ func PrepareRecipient(publicKey string) (pubKey string, privateKey string, err e
 		err = errors.New("invalidKeyError")
 	}
 
-	return publicKey, privateKey, err
+	return pubKey, privateKey, err
 }
 
 // PrepareIdentity sets the Identity up for a private key

@@ -23,7 +23,7 @@ var (
 	Window *astilectron.Window
 	Logger *log.Logger
 	fs     = flag.NewFlagSet(os.Args[0], flag.ContinueOnError)
-	Debug  = fs.Bool("d", true, "enables the debug mode") // CTRL-D -> Dev Tools
+	Debug  = fs.Bool("d", false, "enables the debug mode") // CTRL-D -> Dev Tools
 )
 
 func main() {

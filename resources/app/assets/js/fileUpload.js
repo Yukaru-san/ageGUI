@@ -1,5 +1,3 @@
-const { Z_BLOCK } = require("zlib");
-
 var addedFiles = [];
 var filePaths = [];
 
@@ -212,12 +210,21 @@ function removeAllFiles() {
 // Sends the form to GO to handle encryption / decryption
 function sendForm() {
   
+  // Find the path
+  var encKey = "";
+  if (!keyInputToggle.classList.contains("darkerText"))
+    encKey = keyEntry.value;
+  else if (!passwordInputToggle.classList.contains("darkerText"))
+    encKey = passwordEntry.value;
+  else if (!fileInputToggle.classList.contains("darkerText"))
+    encKey = keyEntryFile.files[0].path;
+    
   // Create and fill the JSON
   var innerJSON = {
     encrypt: cryptChoice.checked,
     zip: zipFiles.checked,
     armor: useArmor.checked,
-    key: passwordInputToggle.classList.contains("darkerText") ? keyEntry.value : passwordEntry.value,
+    key: encKey,
     usePassword: passwordInputToggle.classList.contains("darkerText") ? false : true,
     output: output.value,
     paths: filePaths
