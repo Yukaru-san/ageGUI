@@ -1,0 +1,11 @@
+{
+    "app_name": "Drag & Drop",
+    "icon_path_darwin": "resources/icon.icns",
+    "icon_path_linux": "resources/icon.png",
+    "icon_path_windows": "resources/icon.ico",
+    "environments": [
+        {"arch": "amd64", "os": "linux"},
+        {"arch": "386", "os": "windows"}
+      ],
+    "show_windows_console": true
+  }

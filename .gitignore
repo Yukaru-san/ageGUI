@@ -1,0 +1,21 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# files created by programs
+windows.syso
+bind_*
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Test direcotries
+output
+input
+
+# Test files
+TODO.txt
+
