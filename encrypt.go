@@ -60,41 +60,6 @@ func EncryptFile(filePath string, outputPath string, useArmor bool) (output stri
 
 // Encrypt encrypts the given data according to the supplied args
 func Encrypt(data *[]byte, fileName string, outputPath string, useArmor bool, recipients []age.Recipient) (output string, err error) {
-	// Prepare the buffer and writer
-	out := &bytes.Buffer{}
-
-	// Create Encryption Writer and use armor if needed
-	var armorWriter io.WriteCloser
-	var w io.WriteCloser
-
-	if useArmor {
-		armorWriter := armor.NewWriter(out)
-		w, err = age.Encrypt(armorWriter, recipients...)
-	} else {
-		w, err = age.Encrypt(out, recipients...)
-	}
-
-	// Check for errors
-	if err != nil {
-		return "", err
-		//return "", errors.New("invalidPasswordError")
-	}
-
-	// Write bytes
-	if _, err = w.Write(*data); err != nil {
-		return "", err
-	}
-
-	// Close
-	if err := w.Close(); err != nil {
-		return "", err
-	}
-	if armorWriter != nil {
-		if err := armorWriter.Close(); err != nil {
-			return "", err
-		}
-	}
-
 	// Sanitize Output
 	if len(outputPath) == 0 {
 		outputPath = filepath.Join(GetHome(), "age", "encrypted")
@@ -104,14 +69,41 @@ func Encrypt(data *[]byte, fileName string, outputPath string, useArmor bool, re
 		outputPath = filepath.Join(GetHome(), "age", "encrypted")
 		os.MkdirAll(outputPath, 0750)
 	}
-	outputPath = SanitizeOutput(outputPath, fileName)
+	outputPath = SanitizeOutput(outputPath, fileName) + ".enc"
 
-	// Save as file on disk
-	outputPath += ".enc"
-	err = ioutil.WriteFile(outputPath, out.Bytes(), 0640)
+	// Create file on disk
+	f, err := os.Create(outputPath)
 	if err != nil {
-		return "", errors.New("writeError%" + err.Error())
+		return "", err
 	}
 
+	// Create Encryption Writer and use armor if needed
+	var ageWriter, armorWriter io.WriteCloser
+
+	if useArmor {
+		armorWriter := armor.NewWriter(f)
+		ageWriter, err = age.Encrypt(armorWriter, recipients...)
+	} else {
+		ageWriter, err = age.Encrypt(f, recipients...)
+	}
+
+	// Check for errors
+	if err != nil {
+		return "", err
+	}
+
+	// Write bytes
+	if _, err = io.Copy(ageWriter, bytes.NewBuffer(*data)); err != nil {
+		return "", err
+	}
+
+	// Close
+	ageWriter.Close()
+	if armorWriter != nil {
+		armorWriter.Close()
+	}
+	f.Close()
+
+	// Return
 	return outputPath, err
 }
