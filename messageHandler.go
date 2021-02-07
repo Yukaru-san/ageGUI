@@ -48,8 +48,6 @@ func HandleMessage(w *astilectron.Window, m bootstrap.MessageIn) (payload interf
 		payload = "Unknown command"
 		return
 	}
-
-	return
 }
 
 // Parses a given AgeRequest, does what it needs to do, and returns success / error
@@ -107,7 +105,7 @@ func handleAgeRequest(request AgeRequest) (publicKey string, privateKey string, 
 			} else {
 				// Age Key being used
 				if request.Encrypt {
-					outputPath, err = EncryptFile(file, request.OutputPath, request.UseArmor)
+					outputPath, err = EncryptFile(file, request.OutputPath, request.UseArmor, Recipients)
 				} else {
 					outputPath, err = DecryptFile(file, request.OutputPath, Identities)
 				}

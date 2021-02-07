@@ -87,7 +87,7 @@ func SanitizeOutput(outputPath, fileName string) string {
 	// Given path is a directory
 	if !strings.Contains(GetLastPartOfPath(outputPath), ".") {
 		// Create dir if needed
-		os.MkdirAll(outputPath, 0640)
+		os.MkdirAll(outputPath, 0750)
 
 		// Empty string
 		if len(fileName) == 0 {
@@ -102,7 +102,7 @@ func SanitizeOutput(outputPath, fileName string) string {
 		}
 	} else {
 		// Output is a file, create it's directory if needed
-		os.MkdirAll(GetNthPartOfPath(outputPath, 1), 0640)
+		os.MkdirAll(GetNthPartOfPath(outputPath, 1), 0750)
 	}
 
 	return outputPath
