@@ -37,12 +37,25 @@ func EncryptWithPassword(data *[]byte, inputName string, outputPath string, useA
 	// Buffer Setup
 	r.SetWorkFactor(15)
 	out := &bytes.Buffer{}
-	w, err := age.Encrypt(out, r)
+	var w io.WriteCloser
+
+	// Use Armor Writer if needed
+	if useArmor {
+		armorWriter := armor.NewWriter(out)
+		defer func() {
+			armorWriter.Close()
+		}()
+		w, err = age.Encrypt(armorWriter, r)
+	} else {
+		w, err = age.Encrypt(out, r)
+	}
+
+	// Check for errors
 	if err != nil {
 		return "", errors.New("invalidPasswordError")
 	}
 
-	return finishEncryptionAndSafeToFile(data, inputName, outputPath, useArmor, w, out)
+	return finishEncryptionAndSafeToFile(data, inputName, outputPath, w, out)
 }
 
 // EncryptFile the given file and saves them to the outputPath
@@ -66,7 +79,19 @@ func EncryptFile(filePath string, outputPath string, useArmor bool) (output stri
 func Encrypt(data *[]byte, inputName string, outputPath string, useArmor bool) (output string, err error) {
 	// Prepare the buffer and writer
 	out := &bytes.Buffer{}
-	w, err := age.Encrypt(out, Recipients...)
+
+	var w io.WriteCloser
+
+	// Use Armor if the user wants it
+	if useArmor {
+		armorWriter := armor.NewWriter(out)
+		defer func() {
+			armorWriter.Close()
+		}()
+		w, err = age.Encrypt(armorWriter, Recipients...)
+	} else {
+		w, err = age.Encrypt(out, Recipients...)
+	}
 
 	// Error check
 	if err != nil {
@@ -74,19 +99,10 @@ func Encrypt(data *[]byte, inputName string, outputPath string, useArmor bool) (
 	}
 
 	// Do the Encryption
-	return finishEncryptionAndSafeToFile(data, inputName, outputPath, useArmor, w, out)
+	return finishEncryptionAndSafeToFile(data, inputName, outputPath, w, out)
 }
 
-func finishEncryptionAndSafeToFile(data *[]byte, fileName string, outputPath string, useArmor bool, w io.WriteCloser, out *bytes.Buffer) (output string, err error) {
-	// Using --armor
-	if useArmor {
-		a := armor.NewWriter(w)
-		defer func() {
-			a.Close()
-		}()
-		w = a
-	}
-
+func finishEncryptionAndSafeToFile(data *[]byte, fileName string, outputPath string, w io.WriteCloser, out *bytes.Buffer) (output string, err error) {
 	// Write bytes
 	if _, err = w.Write(*data); err != nil {
 		return "", errors.New("writeError%" + err.Error())
@@ -100,17 +116,17 @@ func finishEncryptionAndSafeToFile(data *[]byte, fileName string, outputPath str
 	// Sanitize Output
 	if len(outputPath) == 0 {
 		outputPath = GetHome() + string(filepath.Separator) + "age" + string(filepath.Separator) + "encrypted"
-		os.MkdirAll(outputPath, 0644)
+		os.MkdirAll(outputPath, 0750)
 	} else if !strings.Contains(outputPath, string(filepath.Separator)) {
 		fileName = outputPath
 		outputPath = GetHome() + string(filepath.Separator) + "age" + string(filepath.Separator) + "encrypted"
-		os.MkdirAll(outputPath, 0644)
+		os.MkdirAll(outputPath, 0750)
 	}
 	outputPath = SanitizeOutput(outputPath, fileName)
 
 	// Save as file on disk
 	outputPath += ".enc"
-	err = ioutil.WriteFile(outputPath, out.Bytes(), 0644)
+	err = ioutil.WriteFile(outputPath, out.Bytes(), 0640)
 	if err != nil {
 		return "", errors.New("writeError%" + err.Error())
 	}
