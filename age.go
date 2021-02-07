@@ -24,7 +24,8 @@ func PrepareRecipient(publicKey string) (pubKey string, privateKey string, err e
 
 	// If no key was supplied
 	if publicKey == "" {
-		pubKey, privateKey, err = GenerateX25519Identity()
+		publicKey, privateKey, err = GenerateX25519Identity()
+		pubKey = publicKey
 	}
 
 	// Parse the recipient

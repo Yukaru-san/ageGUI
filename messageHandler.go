@@ -86,7 +86,7 @@ func handleAgeRequest(request AgeRequest) (publicKey string, privateKey string, 
 			}
 		} else {
 			// Age Key
-			outputPath, err = Encrypt(zipBytes, GenerateRandomString(10)+".zip", request.OutputPath, request.UseArmor)
+			outputPath, err = Encrypt(zipBytes, GenerateRandomString(10)+".zip", request.OutputPath, request.UseArmor, Recipients)
 			if err != nil {
 				return "", "", "", err
 			}
@@ -109,7 +109,7 @@ func handleAgeRequest(request AgeRequest) (publicKey string, privateKey string, 
 				if request.Encrypt {
 					outputPath, err = EncryptFile(file, request.OutputPath, request.UseArmor)
 				} else {
-					outputPath, err = DecryptFile(file, request.OutputPath)
+					outputPath, err = DecryptFile(file, request.OutputPath, Identities)
 				}
 			}
 		}

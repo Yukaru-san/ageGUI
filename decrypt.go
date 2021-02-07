@@ -13,24 +13,35 @@ import (
 	"filippo.io/age/armor"
 )
 
+// DecryptFileWithPassword takes the given file and decrypts it's content
+func DecryptFileWithPassword(inputPath string, outputPath string, password string) (output string, err error) {
+
+	// Create Identity
+	identity, err := age.NewScryptIdentity(password)
+	if err != nil {
+		return "", errors.New("invalidPasswordError")
+	}
+
+	// Decrypt and return
+	return DecryptFile(inputPath, outputPath, []age.Identity{identity})
+}
+
 // DecryptFile takes the given file and decrypts it's content
-func DecryptFile(inputPath string, outputPath string) (output string, err error) {
+func DecryptFile(inputPath string, outputPath string, identities []age.Identity) (output string, err error) {
 	// Read the input file
 	f, err := os.Open(inputPath)
 	if err != nil {
 		return "", errors.New("inputPathError")
 	}
 
-	// Prepare reader for one or more Identities
-	var r io.Reader
-
-	// When the file is using Armor TODO make it more efficient TODO Make it work at all lol
+	// Prepare the Decryption Reader. Use Armor if needed
+	var ageReader io.Reader
 	if b, _ := ioutil.ReadFile(inputPath); strings.HasPrefix(string(b), "-----BEGIN AGE ENCRYPTED FILE-----") {
 		armorReader := armor.NewReader(f)
-		r, err = age.Decrypt(armorReader, Identities...)
+		ageReader, err = age.Decrypt(armorReader, identities...)
 	} else {
 		// Decrypt
-		r, err = age.Decrypt(f, Identities...)
+		ageReader, err = age.Decrypt(f, identities...)
 	}
 
 	if err != nil {
@@ -38,58 +49,23 @@ func DecryptFile(inputPath string, outputPath string) (output string, err error)
 		// return errors.New("invalidKeyError")
 	}
 
-	return finishDecryptionAndSafeToFile(GetLastPartOfPath(inputPath), outputPath, r)
-}
-
-// DecryptFileWithPassword takes the given file and decrypts it's content
-func DecryptFileWithPassword(inputPath string, outputPath string, password string) (output string, err error) {
-
-	// Read the input file
-	f, err := os.Open(inputPath)
-	if err != nil {
-		return "", errors.New("inputPathError")
-	}
-
-	// Create Identity
-	i, err := age.NewScryptIdentity(password)
-	if err != nil {
-		return "", errors.New("invalidPasswordError")
-	}
-
-	// Prepare reader for one or more Identities
-	var r io.Reader
-
-	// When the file is using Armor TODO make it more efficient TODO Make it work at all lol
-	if b, _ := ioutil.ReadFile(inputPath); strings.HasPrefix(string(b), "-----BEGIN AGE ENCRYPTED FILE-----") {
-		armorReader := armor.NewReader(f)
-		r, err = age.Decrypt(armorReader, i)
-	} else {
-		// Decrypt
-		r, err = age.Decrypt(f, i)
-	}
-
-	if err != nil {
-		return "", errors.New("invalidPasswordError")
-	}
-
-	return finishDecryptionAndSafeToFile(GetLastPartOfPath(inputPath), outputPath, r)
-}
-
-func finishDecryptionAndSafeToFile(fileName string, outputPath string, r io.Reader) (output string, err error) {
 	// Read and decrypt data
 	out := &bytes.Buffer{}
-	if _, err := io.Copy(out, r); err != nil {
-		return "", errors.New("io.Copy Error: " + err.Error())
-		// return "", errors.New("inputPathError")
+	if _, err := io.Copy(out, ageReader); err != nil {
+		return "", err
 	}
+
+	// Close File
+	f.Close()
 
 	// Sanitize Output
 	if len(outputPath) == 0 {
 		outputPath = GetHome() + string(filepath.Separator) + "age" + string(filepath.Separator) + "decrypted"
 		os.MkdirAll(outputPath, 0750)
 	}
-	outputPath = SanitizeOutput(outputPath, fileName)
+	outputPath = SanitizeOutput(outputPath, GetLastPartOfPath(inputPath))
 
+	// Remove .enc Suffix if needed
 	if strings.HasSuffix(outputPath, ".enc") {
 		outputPath = outputPath[:len(outputPath)-4]
 	}
