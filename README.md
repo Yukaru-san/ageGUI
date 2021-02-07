@@ -5,8 +5,10 @@ A cross-platform all-in-one GUI for FiloSottile's "age" - A simple and secure en
 The GUI is currently supporting the following features:
 - Encrypt and Decrypt Files and Directories
 - Encrypt directly into a zip file
-- Use of Age keys and Passwords
+- Encryption armor
+- Age keys and Passwords
 - Reading Keys from a file
+- Easily Encrypt and Decrypt in a few clicks
 
 # Installation
 If you want to compile the GUI yourself:
