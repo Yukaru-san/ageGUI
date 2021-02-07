@@ -1,5 +1,5 @@
 # ageGUI
-A cross-platform all-in-one GUI for FiloSottile's "age" - A simple and secure encryption tool.
+A cross-platform all-in-one GUI for [FiloSottile's "age"](https://github.com/FiloSottile/age) - A simple and secure encryption tool.
 
 # Features
 The GUI is currently supporting the following features:
@@ -8,7 +8,6 @@ The GUI is currently supporting the following features:
 - Encryption armor
 - Age keys and Passwords
 - Reading Keys from a file
-- Easily Encrypt and Decrypt in a few clicks
 
 # Installation
 If you want to compile the GUI yourself:
@@ -20,7 +19,7 @@ If you want to compile the GUI yourself:
 Note that this requires the [Astilectron Bundler](https://github.com/asticode/go-astilectron-bundler) to pack everything into a single file
 <br>
 
-You can also head over to the [release tab](https://github.com/Yukaru-san/ageGUI/releases/tag/v1.01) and download a precompiled version.
+You can also head over to the [release tab](https://github.com/Yukaru-san/ageGUI/releases/tag/v1.1) and download a precompiled version.
 
 # Looks
 ### File Selection
