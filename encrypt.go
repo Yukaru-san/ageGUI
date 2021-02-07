@@ -78,13 +78,12 @@ func Encrypt(data *[]byte, fileName string, outputPath string, useArmor bool, re
 	}
 
 	// Create Encryption Writer and use armor if needed
-	var ageWriter, armorWriter io.WriteCloser
-
+	var w, a io.WriteCloser
 	if useArmor {
-		armorWriter := armor.NewWriter(f)
-		ageWriter, err = age.Encrypt(armorWriter, recipients...)
+		a := armor.NewWriter(f)
+		w, err = age.Encrypt(a, recipients...)
 	} else {
-		ageWriter, err = age.Encrypt(f, recipients...)
+		w, err = age.Encrypt(f, recipients...)
 	}
 
 	// Check for errors
@@ -93,14 +92,15 @@ func Encrypt(data *[]byte, fileName string, outputPath string, useArmor bool, re
 	}
 
 	// Write bytes
-	if _, err = io.Copy(ageWriter, bytes.NewBuffer(*data)); err != nil {
+	_, err = io.Copy(w, bytes.NewBuffer(*data))
+	if err != nil {
 		return "", err
 	}
 
 	// Close
-	ageWriter.Close()
-	if armorWriter != nil {
-		armorWriter.Close()
+	w.Close()
+	if a != nil {
+		a.Close()
 	}
 	f.Close()
 
