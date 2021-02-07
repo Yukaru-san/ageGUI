@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -107,7 +108,7 @@ func handleAgeRequest(request AgeRequest) (publicKey string, privateKey string, 
 			} else {
 				// Age Key being used
 				if request.Encrypt {
-					outputPath, err = EncryptFile(file, request.OutputPath, request.UseArmor)
+					outputPath, err = EncryptFile(file, request.OutputPath, request.UseArmor, Recipients)
 				} else {
 					outputPath, err = DecryptFile(file, request.OutputPath, Identities)
 				}
@@ -120,6 +121,8 @@ func handleAgeRequest(request AgeRequest) (publicKey string, privateKey string, 
 		publicKey = ""
 		privateKey = ""
 	}
+
+	fmt.Println("\n\nOUTPUT_PATH = " +outputPath+"\n\n")
 
 	return publicKey, privateKey, outputPath, err
 }

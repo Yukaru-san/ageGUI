@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"filippo.io/age"
 	"filippo.io/age/armor"
@@ -42,7 +41,7 @@ func EncryptWithPassword(data *[]byte, inputName string, outputPath string, useA
 }
 
 // EncryptFile the given file and saves them to the outputPath
-func EncryptFile(filePath string, outputPath string, useArmor bool) (output string, err error) {
+func EncryptFile(filePath string, outputPath string, useArmor bool, recipients []age.Recipient) (output string, err error) {
 	// Fix potential file path errors
 	filePath = ReplaceFilepathSeparator(filePath, string(filepath.Separator))
 
@@ -55,40 +54,31 @@ func EncryptFile(filePath string, outputPath string, useArmor bool) (output stri
 	}
 
 	// Encrypt and return
-	return Encrypt(&fileData, GetLastPartOfPath(filePath), outputPath, useArmor, Recipients)
+	return Encrypt(&fileData, GetLastPartOfPath(filePath), outputPath, useArmor, recipients)
 }
 
 // Encrypt encrypts the given data according to the supplied args
 func Encrypt(data *[]byte, fileName string, outputPath string, useArmor bool, recipients []age.Recipient) (output string, err error) {
-	// Sanitize Output
-	if len(outputPath) == 0 {
-		outputPath = filepath.Join(GetHome(), "age", "encrypted")
-		os.MkdirAll(outputPath, 0750)
-	} else if !strings.Contains(outputPath, string(filepath.Separator)) {
-		fileName = outputPath
-		outputPath = filepath.Join(GetHome(), "age", "encrypted")
-		os.MkdirAll(outputPath, 0750)
-	}
-	outputPath = SanitizeOutput(outputPath, fileName) + ".enc"
 
-	// Create file on disk
-	f, err := os.Create(outputPath)
+	// Prepare the file to write to
+	fullPath := GetFullPath(fileName, outputPath)
+	f, err := os.Create(fullPath)
 	if err != nil {
 		return "", err
 	}
 
-	// Create Encryption Writer and use armor if needed
+	// Use Armor if the user wants it
 	var w, a io.WriteCloser
 	if useArmor {
-		a := armor.NewWriter(f)
+		a = armor.NewWriter(f)
 		w, err = age.Encrypt(a, recipients...)
 	} else {
 		w, err = age.Encrypt(f, recipients...)
 	}
 
-	// Check for errors
+	// Error check
 	if err != nil {
-		return "", err
+		return "", errors.New("invalidKeyError")
 	}
 
 	// Write bytes
@@ -104,6 +94,5 @@ func Encrypt(data *[]byte, fileName string, outputPath string, useArmor bool, re
 	}
 	f.Close()
 
-	// Return
-	return outputPath, err
+	return fullPath, nil
 }

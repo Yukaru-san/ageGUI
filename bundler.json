@@ -4,7 +4,9 @@
   "icon_path_linux": "resources/icon.png",
   "icon_path_windows": "resources/icon.ico",
   "environments": [
+      {"arch": "amd64", "os": "darwin"},
+      {"arch": "amd64", "os": "linux"},
       {"arch": "386", "os": "windows"}
     ],
-  "show_windows_console": true
+  "show_windows_console": false
 }

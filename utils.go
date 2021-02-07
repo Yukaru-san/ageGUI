@@ -82,12 +82,30 @@ func ReplaceFilepathSeparator(filePath string, newSeparator string) string {
 	return filePath
 }
 
+// GetFullPath creates and returns the path to the given file
+func GetFullPath(fileName string, outputPath string) string {
+	// Sanitize Output
+	if len(outputPath) == 0 {
+		outputPath = GetHome() + string(filepath.Separator) + "age" + string(filepath.Separator) + "encrypted"
+		os.MkdirAll(outputPath, 0750)
+	} else if !strings.Contains(outputPath, string(filepath.Separator)) {
+		fileName = outputPath
+		outputPath = GetHome() + string(filepath.Separator) + "age" + string(filepath.Separator) + "encrypted"
+		os.MkdirAll(outputPath, 0750)
+	}
+	outputPath = SanitizeOutput(outputPath, fileName)
+	outputPath += ".enc"
+
+	// Return
+	return outputPath
+}
+
 // SanitizeOutput tries to create a correct output path across user inputs and devices
 func SanitizeOutput(outputPath, fileName string) string {
 	// Given path is a directory
 	if !strings.Contains(GetLastPartOfPath(outputPath), ".") {
 		// Create dir if needed
-		os.MkdirAll(outputPath, 0640)
+		os.MkdirAll(outputPath, 0750)
 
 		// Empty string
 		if len(fileName) == 0 {
@@ -102,7 +120,7 @@ func SanitizeOutput(outputPath, fileName string) string {
 		}
 	} else {
 		// Output is a file, create it's directory if needed
-		os.MkdirAll(GetNthPartOfPath(outputPath, 1), 0640)
+		os.MkdirAll(GetNthPartOfPath(outputPath, 1), 0750)
 	}
 
 	return outputPath

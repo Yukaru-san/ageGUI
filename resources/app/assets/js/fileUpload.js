@@ -162,11 +162,13 @@ function toggleEncryptSelect() {
     zipFilesParent.style.display = "block";
     useArmorParent.style.display = "block";
     keyEntry.setAttribute("data-original-title", "Generates Key Pair if empty");
+    keyEntry.placeholder = "age1aerfzuo7j8907j8k90defrwnzumiofznj4rf...";
   // Hide
   } else {
     zipFilesParent.style.display = "none";
     useArmorParent.style.display = "none";
     keyEntry.setAttribute("data-original-title", "");
+    keyEntry.placeholder = "AGE-SECRET-KEY-1Q36W52MMHRMK0CXF7A...";
   }
 }
 
