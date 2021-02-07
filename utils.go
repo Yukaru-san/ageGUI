@@ -61,8 +61,7 @@ func GenerateRandomString(n int) string {
 
 // GetLastPartOfPath returns a path's last part like a file's name
 func GetLastPartOfPath(path string) string {
-	filePathSplit := strings.Split(path, string(filepath.Separator))
-	return filePathSplit[len(filePathSplit)-1]
+	return filepath.Base(path)
 }
 
 // GetNthPartOfPath returns the nth part from a path, going right to left (file to C:)

@@ -9,8 +9,7 @@ import (
 
 // ...
 var (
-	Recipient  *age.X25519Recipient
-	Identity   *age.X25519Identity
+	Recipients []age.Recipient
 	Identities []age.Identity
 )
 
@@ -18,8 +17,9 @@ var (
 func PrepareRecipient(publicKey string) (pubKey string, privateKey string, err error) {
 	// If key is a file reference
 	if DoesFileExist(publicKey) {
-		publicKey = ReadFileToString(publicKey)
-		pubKey = ""
+		f, _ := os.Open(publicKey)
+		Recipients, err = age.ParseRecipients(f)
+		return
 	}
 
 	// If no key was supplied
@@ -27,11 +27,14 @@ func PrepareRecipient(publicKey string) (pubKey string, privateKey string, err e
 		pubKey, privateKey, err = GenerateX25519Identity()
 	}
 
-	Recipient, err = age.ParseX25519Recipient(publicKey)
+	// Parse the recipient
+	recipient, err := age.ParseX25519Recipient(publicKey)
 	if err != nil {
-		err = errors.New("invalidKeyError")
+		return "", "", err
 	}
+	Recipients = append(Recipients, recipient)
 
+	// Return error and keys if needed
 	return pubKey, privateKey, err
 }
 
@@ -41,21 +44,24 @@ func PrepareIdentity(privateKey string) (err error) {
 	if DoesFileExist(privateKey) {
 		return PrepareAndParseIdentities(privateKey)
 	}
-	Identity, err = age.ParseX25519Identity(privateKey)
+	var identity *age.X25519Identity
+	identity, err = age.ParseX25519Identity(privateKey)
 	if err != nil {
 		err = errors.New("invalidKeyError")
 	}
+	Identities = append(Identities, identity)
+
 	return err
 }
 
 // PrepareAndParseIdentities sets the Identity up for every private key in the given file
 func PrepareAndParseIdentities(keyStoragePath string) (err error) {
+
 	// Open File
 	keyFile, err := os.Open(keyStoragePath)
 	if err != nil {
 		return err
 	}
-
 	// Parse identites
 	Identities, err = age.ParseIdentities(keyFile)
 	return err

@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -49,8 +48,7 @@ func EncryptWithPassword(data *[]byte, inputName string, outputPath string, useA
 // EncryptFile the given file and saves them to the outputPath
 func EncryptFile(filePath string, outputPath string, useArmor bool) (output string, err error) {
 	// Fix potential file path errors
-	filePath = strings.ReplaceAll(filePath, "\\\\", string(filepath.Separator))
-	filePath = strings.ReplaceAll(filePath, "/", string(filepath.Separator))
+	filePath = ReplaceFilepathSeparator(filePath, string(filepath.Separator))
 
 	// Read the file's content
 	fileData, err := ioutil.ReadFile(filePath)
@@ -68,7 +66,7 @@ func EncryptFile(filePath string, outputPath string, useArmor bool) (output stri
 func Encrypt(data *[]byte, inputName string, outputPath string, useArmor bool) (output string, err error) {
 	// Prepare the buffer and writer
 	out := &bytes.Buffer{}
-	w, err := age.Encrypt(out, Recipient)
+	w, err := age.Encrypt(out, Recipients...)
 
 	// Error check
 	if err != nil {
@@ -90,15 +88,10 @@ func finishEncryptionAndSafeToFile(data *[]byte, fileName string, outputPath str
 	}
 
 	// Write bytes
-	var i int
-	i, err = w.Write(*data)
-	fmt.Println(i)
-	fmt.Println(err)
-	/*
-		if _, err = w.Write(*data); err != nil {
-			return "", errors.New("writeError%" + err.Error())
-		}
-	*/
+	if _, err = w.Write(*data); err != nil {
+		return "", errors.New("writeError%" + err.Error())
+	}
+
 	// Close
 	if err := w.Close(); err != nil {
 		return "", errors.New("writeError%" + err.Error())

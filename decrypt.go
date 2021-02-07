@@ -22,11 +22,7 @@ func DecryptFile(inputPath string, outputPath string) (output string, err error)
 
 	// Prepare reader for one or more Identities
 	var r io.Reader
-	if len(Identities) == 0 {
-		r, err = age.Decrypt(f, Identity)
-	} else {
-		r, err = age.Decrypt(f, Identities...)
-	}
+	r, err = age.Decrypt(f, Identities...)
 	if err != nil {
 		return "", err
 		// return errors.New("invalidKeyError")
@@ -64,7 +60,8 @@ func finishDecryptionAndSafeToFile(fileName string, outputPath string, r io.Read
 	// Read and decrypt data
 	out := &bytes.Buffer{}
 	if _, err := io.Copy(out, r); err != nil {
-		return "", errors.New("inputPathError")
+		return "", err
+		// return "", errors.New("inputPathError")
 	}
 
 	// Sanitize Output
