@@ -22,11 +22,9 @@ Note that this requires the [Astilectron Bundler](https://github.com/asticode/go
 You can also head over to the [release tab](https://github.com/Yukaru-san/ageGUI/releases/tag/v1.1) and download a precompiled version.
 
 # Looks
-### File Selection
-![example1](https://files.jojii.de/preview/raw/WCLdLuRRtUPKg2CLWlIpCs7Qb)
-<br>
-### Options
-![example1](https://files.jojii.de/preview/raw/rzEI3ffL5iWooCrdvE4hLiiQB)
-<br>
-### Output when no key was provided
-![example1](https://files.jojii.de/preview/raw/wfnDwUFYJInHRC3dGI6Iuzseg)
+
+File selection             |  Settings
+:-------------------------:|:-------------------------:
+<img src="https://github.com/Yukaru-san/ageGUI/blob/master/preview/age1.png" width="400" height="400" />  | <img src="https://github.com/Yukaru-san/ageGUI/blob/master/preview/age2.png" width="400" height="400" />
+Encryption            |
+<img src="https://github.com/Yukaru-san/ageGUI/blob/master/preview/age3.png" width="400" height="400" /> |
